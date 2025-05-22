@@ -1,0 +1,1634 @@
+---
+title: "MY457 Summative Assignment: Reappraisal of Civil Liberties in times of Crisis (Alsan et. al, 2023)"
+date:  "`r format(Sys.time(), '%a/%d/%b')`"
+author: "Candidate Number: 47760"
+always_allow_html: true
+output: 
+  bookdown::pdf_document2:
+    toc: false
+    pdf_engine: xelatex
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include = FALSE}
+# this chunk contains code that sets global options for the entire .Rmd. 
+# we use include=FALSE to suppress it from the top of the document, but it will still appear in the appendix. 
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE, linewidth=60)
+
+# you can include your libraries here:
+library(DiagrammeR)
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(ggplot2)
+library(forcats)
+library(patchwork)
+library(AER)
+library(sandwich)
+library(lmtest)
+library(kableExtra)
+library(tidyr)
+```
+
+# Introduction to the study
+
+Alsan et al. (2023) studied how perceived health insecurities during the COVID-19 pandemic affected the individuals' willingness to sacrifice civil liberties.
+To test this, they implemented two large-scale online surveys, followed by an incentivised online experiment.
+The survey studies included a longitudinal survey across 13 countries with over 530,000 responses collected weekly and a cross-sectional in-depth survey conducted in 7 countries with over 13,000 respondents.
+To estimate the causal relationship between the willingness to trade off civil liberties and health insecurities, while avoiding omitted variable bias, the authors facilitated two instrumental variable (IV) designs, with the longitudinal survey using local COVID-related death statistics and the in-depth survey using randomly allocated information on health threats as an instrument.
+They observe high levels of heterogeneity amongst the respondents and that an increase by one standard deviation in health insecurity enhances the individual willingness to sacrifice civil liberties by 10.5 percentage points for own rights, 17.4 percentage points for support of government control over the press, and 12.9 percentage points for relaxing privacy protections.
+
+# Data and variables
+
+The study facilitated two surveys to examine how increases in health insecurity influence the willingness to give up civil liberties in the context of COVID-19.
+
+The longitudinal survey collected cross-sectional data for over 11 months across 13 countries, starting in March 2020.
+It primarily focused on assessing the individual willingness to accept limitations on civil liberties, such as support for suspending democratic procedures, as well as demographic characteristics, political preferences and general trust in the government.
+In this survey, health insecurity was measured as the average response to the following three items, which were measured on a scale from 0 (not concerned at all) to 10 (extremely concerned): concern for one's health, concern for the health of elderly people, and concern about the healthcare system's capacity.
+
+The in-depth survey was conducted with a different sample between March 30th and April 18th 2020.
+In addition to collecting similar information on civil liberties, political trust, and health insecurity, it included an experiment that randomly exposed respondents to messages emphasising the exponential spread of COVID-19 and the associated burden on health systems via images and graphics.
+Here, health insecurities are measured as the average agreement to two statements, either emphasising the threat that the pandemic imposes on the population or the health care system, also measured on a scale from 0 (strongly disagree) to 10 (strongly agree).
+
+To enhance the validity of both surveys and connect them to real-world behaviour, an associated incentivised online experiment was conducted afterwards with a separate sample, where participants made real decisions about donations and petition sharing related to civil liberties, confirming that survey responses align with actual behaviour.
+
+# Research Design and Causal Identification Strategy
+
+## General Research Structure
+
+The author's research design can be subdivided into three steps: Descriptively analysing health insecurities and associated properties as an outcome variable, causal estimation and overall validation (see .
+
+In the first step, the authors analysed the relationship between health insecurities and willingness to sacrifice civil liberties using standardized indices derived from survey responses.
+Using OLS regressions, they estimate the effect of health insecurity on willingness to restrict rights, controlling for age and sex.
+Regressions were run by country and week to capture variation over time and across contexts.
+
+Subsequently, Alsan et al. (2023) estimated the causal impact of health insecurities on attitudes toward civil liberties using a two-stage least squares (2SLS) design with longitudinal survey data.
+The endogenous regressor was self-reported health insecurity, with local variations in weekly COVID-19 mortality rates as an instrument.
+The 2SLS specification can be described as follows: $$ Y_{ik} = \alpha_{j(ik)} + \alpha_{t(ik)} + \gamma_0 \cdot \widehat{\text{HealthInsecurity}}_{ik} + X_{ikj(ik)t(ik)}' \Omega_0 + \varepsilon_{ik} $$ $$ \text{HealthInsecurity}_{ik} = \alpha_{j(ik)} + \alpha_{t(ik)} + \gamma_1 \cdot \text{COVIDIncidence}_{j(ik)t(ik)} + X_{ikj(ik)t(ik)}' \Omega_1 + \kappa_{ik} $$ Here, $Y_{ik}$ represents the willingness to give up civil liberties, $\text{COVIDIncidence}_{jt}$ is the log of COVID-19 deaths per 1,000 people per region $j$ and week $t$, while $X$ describes individual and contextual controls.
+Region ($\alpha_j$) and week ($\alpha_t$) fixed effects were used to avoid geographic and temporal heterogeneity.
+Standard errors were clustered at the first administrative division level, representing regional districts.
+
+The empirical strategy of the in-depth survey also employed a 2SLS design, using randomly assigned information provision on the COVID-19 pandemic as an instrument, which was represented by the random assignment.
+This model can be specified as: $$ Y_i = \alpha_{c(i)} + \alpha_{w(i)} + \alpha_{h(i)} + \gamma_2 \cdot \widehat{\text{HealthInsecurity}}_i + X_{ic(i)h(i)w(i)}' \Omega_2 + \nu_i $$ $$ \text{HealthInsecurity}_i = \alpha_{c(i)} + \alpha_{w(i)} + \alpha_{h(i)} + \theta \cdot T_i + X_{ic(i)h(i)w(i)}' \Omega_3 + \mu_i $$ where $T_i$ is the treatment assignment indicator, $Y_i$ denotes outcomes (binary, continuous, or z-score indices), and fixed effects $\alpha$ capture country, week, and stratified randomisation (hotspot) effects.
+Covariates included age, sex, education, income, pre-existing conditions, and attitudes toward surveillance and economic risks.
+
+In the final step, the authors strengthened their empirical strategy through a validation study and robustness checks.
+To assess the connection between stated preferences and actual behaviour, they correlated stated preferences with revealed behaviours in the in-depth survey.
+Furthermore, they conducted a separate validation study with a new sample after the main survey period, in which individuals made real, incentivized choices.
+In terms of robustness, they show that their results are not sensitive to alternative specifications, such as the inclusion of additional controls, exclusion of outlier regions, alternative outcomes or other instrument specifications.
+
+## Underlying Assumptions
+
+The causal identification strategy, used by Alsan et al. (2023) relies on the standard LATE assumptions of IV regressions: relevance, exclusion restriction, ignorability, monotonicity, and the Stable Unit Treatment Value Assumption (SUTVA) (Angrist et al., 1996).
+
+In both the longitudinal and in-depth survey, relevance was tested using first-stage regressions of the 2SLS model in which perceived health insecurity was regressed on the instrument.
+To evaluate the results, the Kleibergen-Paap F statistic was used, a generalisation of a standard first-stage F statistic, which is robust to heteroskedasticity and clustering (Kleibergen & Paap, 2006).
+The authors observed in both surveys that COVID mortality has got the highest explanatory power for deviations in health insecurities, represented by Kleibergen-Paap F statistics of between 56 and 117.
+
+The exclusion restriction requires that the instrument affect the outcome only through perceived health insecurity.
+In the in-depth survey, this condition is plausible because treatments were randomly assigned, and the civil liberties questions were introduced only after the health information treatment to minimize alternative pathways.
+To verify the credibility of randomization, the authors conducted balance tests across treatment and control groups, finding no systematic differences in observable characteristics, supporting the assumption of instrument exogeneity (ignorability).
+The exclusion restriction cannot be directly tested in the longitudinal survey, where regional COVID-19 mortality rates serve as an instrument.
+However, the authors provided support for ignorability by regressing a broad set of demographic covariates on standardized mortality rates and find no significant associations conditional on geographic and policy controls.
+Ignorability in the in-depth survey is ensured through random assignment, while in the observational setting, it is supported through balance tests and conditioning on lagged mortality, policy stringency, and fixed effects.
+
+The monotonicity assumption states that the instrument induces a nonnegative change in the treatment variable for all individuals.
+This assumption appears plausible, as both the mortality shocks and the information treatment are designed to weakly increase perceived health insecurity.
+The authors do not find evidence of subgroups reacting in the opposite direction, and formal tests comparing empirical cumulative distribution functions (CDFs) show first-order stochastic dominance of the treatment group over the control group.
+A Kolmogorov-Smirnov test confirms this dominance at the 1% level.
+In addition, subgroup analyses consistently show positive first-stage effects across demographic groups and countries, supporting the absence of defiers and the validity of the LATE interpretation.
+
+Despite SUTVA not being specifically mentioned, it could be assumed to hold because the survey is self-administered, with no interactions between respondents and a single version of the treatment per individual.
+
+# Replication
+
+The replication can be structured into three distinctive steps: Heterogeneity analysis of individual willingness to sacrifice rights, replication of the 2SLS estimation for the longitudinal survey and 2SLS estimation of the in-depth survey.
+
+## Heterogeneity in individual willingness to sacrifice civil rights (in-depth survey)
+
+In the first step, I assessed how willingness to sacrifice rights can vary across different sets of characteristics, facilitating the in-depth survey as it included a broader range of attributes.
+Thus, I filterd the in-depth survey data to include only control group respondents and subsequently ran different OLS regressions on the various attributes are being conducted while controlling for country-specific effects and COVID-19 hotspot districts.
+In accordance with the the authors research strategy, I organised variables into three blocks: demographics, disadvantaged groups, and political attributes.
+Each regression estimated how these characteristics correlate with willingness to sacrifice rights, expressed as coefficient values with 95% confidence intervals.
+The resulting tornado plot was created, mimicing figure 2 in the initial paper by Alsan et al. (2023), which indicates significant heterogeneity in willingness to sacrifice civil liberties.
+Key findings include lower willingness among disadvantaged groups and those with exposure to authoritarian regimes like North Korea or China (see Figure 1).
+
+```{r fig1, fig.cap="Heterogeneity amongst individual willingness to sacrifice rights in the in-depth survey", echo=FALSE, fig.width=6, fig.height=4, fig.pos="ht", out.width="80%"}
+
+# === 1. Load libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(ggplot2)
+library(forcats)
+
+# === 2. Read & filter data ===
+# Loaded the in-depth survey into the working directory and ensured that only non-treated individuals are analysed for baseline willingness
+df0 <- read_dta("../2input_data/in_depth_survey.dta")
+df1 <- df0
+df1 <- df1[df1$sample_main == 1, ]
+df1 <- df1[df1$N_treatment == 0, ]
+
+# === 3. Create demographic & political variables ===
+# Created binary variables for demographic factors like race, education, political alignment, and gender to be displayed in the plot
+df1 <- df1 %>%
+  mutate(
+    black_white = case_when(
+      D_blackUSA == 1 ~ 1,
+      D_whiteUSA == 1 ~ 0,
+      TRUE            ~ NA_integer_
+    ),
+    china_west = case_when(
+      country_code == "CHN"                             ~ 1,
+      country_code %in% c("USA", "DEU", "FRA", "ITA", "GBR") ~ 0,
+      TRUE                                               ~ NA_integer_
+    ),
+    no_col_dip = 1 - D_college_diploma,
+    D_female   = 1 - D_male
+  ) %>%
+  mutate(
+    political_match = case_when(
+      country_code == "KOR" & D_pol_left    == 1 & !is.na(polspectrum_sk)  ~ 1,
+      country_code == "KOR" & D_pol_left    == 0 & !is.na(polspectrum_sk)  ~ 0,
+      country_code == "GBR" & D_pol_right   == 1 & !is.na(polspectrum_uk)  ~ 1,
+      country_code == "GBR" & D_pol_right   == 0 & !is.na(polspectrum_uk)  ~ 0,
+      country_code == "ITA" & D_pol_right   == 1 & !is.na(polspectrum_ita) ~ 1,
+      country_code == "ITA" & D_pol_right   == 0 & !is.na(polspectrum_ita) ~ 0,
+      country_code == "DEU" & D_pol_right   == 1 & !is.na(polspectrum_ger) ~ 1,
+      country_code == "DEU" & D_pol_right   == 0 & !is.na(polspectrum_ger) ~ 0,
+      country_code == "FRA" & D_pol_neutral == 1 & !is.na(polspectrum_fra) ~ 1,
+      country_code == "FRA" & D_pol_neutral == 0 & !is.na(polspectrum_fra) ~ 0,
+      country_code == "USA" & D_pol_right   == 1 & !is.na(polspectrum_us)  ~ 1,
+      country_code == "USA" & D_pol_right   == 0 & !is.na(polspectrum_us)  ~ 0,
+      TRUE                                                                   ~ NA_integer_
+    )
+  )
+
+# === 4. Create income dummies & clean up ===
+# Creation income quartiles to be displayed in the plot for reasons of simplicity
+df1 <- df1 %>%
+  select(-any_of("H_income2")) %>%
+  mutate(
+    H_income1 = ifelse(H_income == 1, 1, 0),
+    H_income2 = ifelse(H_income == 2, 1, 0),
+    H_income3 = ifelse(H_income == 3, 1, 0),
+    H_income4 = ifelse(H_income == 4, 1, 0)
+  ) %>%
+  mutate(
+    D_korea_koreanwar = ifelse(D_korea_koreanwarf6 == 1, NA, D_korea_koreanwar)
+  )
+
+# === 5. Define controls ===
+# Consolidated control variables to be facilitated for subsequent regression analyses
+cc_vars  <- grep("^CC_", names(df1), value = TRUE)
+controls <- c(cc_vars, "D_hotspot")
+
+# === 6.Run demographic-specific regressions ===
+# Estimate OLS models for each demographic and political variable. The models include fixed effects for week and contextual controls
+demo_vars <- c(
+  "D_female", "D_med_any", "black_white", "no_col_dip",
+  "political_match", "D_gmistrust_media", "D_korea_koreanwar", "china_west"
+)
+models_demo <- lapply(demo_vars, function(v) {
+  fmla <- as.formula(
+    paste0("own_rights_bn ~ ", v, " + ",
+           paste(controls, collapse = " + "),
+           " | week - 1")
+  )
+  feols(fmla, data = df1, vcov = "HC1", intercept = FALSE)
+})
+names(models_demo) <- demo_vars
+
+# === 7. Age-group and Income-group regressions ===
+# Run OLS models for age and income groups separately, which enables an comparisons across sub-groups
+age_terms <- c(paste0("age_group", 2:6), "age_group1")
+inc_terms <- c(paste0("H_income", 1:3), "H_income4")
+
+mod_age <- feols(
+  as.formula(
+    paste0("own_rights_bn ~ ", paste(age_terms, collapse = " + "),
+           " + ", paste(controls, collapse = " + "),
+           " | week - 1")
+  ),
+  data = df1, vcov = "HC1", intercept = FALSE
+)
+
+mod_inc <- feols(
+  as.formula(
+    paste0("own_rights_bn ~ ", paste(inc_terms, collapse = " + "),
+           " + ", paste(controls, collapse = " + "),
+           " | week - 1")
+  ),
+  data = df1, vcov = "HC1", intercept = FALSE
+)
+
+# === 8. Combine coefficients ===
+# Ordering coefficients into a structured data frame for subsequent plotting
+coef_df <- bind_rows(
+  lapply(demo_vars, function(v) {
+    tidy(models_demo[[v]], conf.int = TRUE) %>%
+      filter(term == v)
+  }),
+  tidy(mod_age, conf.int = TRUE) %>%
+    filter(term %in% age_terms),
+  tidy(mod_inc, conf.int = TRUE) %>%
+    filter(term %in% inc_terms)
+) %>%
+  mutate(term = factor(term, levels = c(demo_vars, age_terms, inc_terms)))
+
+baseline_df <- data.frame(
+  term      = c("age_group1", "H_income4"),
+  estimate  = 0,
+  conf.low  = 0,
+  conf.high = 0,
+  stringsAsFactors = FALSE
+)
+
+coef_full <- bind_rows(coef_df, baseline_df) %>%
+  arrange(term)
+
+# === 9. Create plotting data ===
+# Map variables and make them readable
+term_order <- c(
+  "D_female", "age_group1", "age_group2", "age_group3", "age_group4", "age_group5", "age_group6",
+  "D_med_any", "H_income1", "H_income2", "H_income3", "H_income4",
+  "black_white", "no_col_dip",
+  "political_match", "D_gmistrust_media", "D_korea_koreanwar", "china_west"
+)
+
+label_map <- c(
+  D_female = "Female",
+  age_group1 = "Age 18–24", age_group2 = "Age 25–34", age_group3 = "Age 35–44",
+  age_group4 = "Age 45–54", age_group5 = "Age 55–64", age_group6 = "Age 65+",
+  D_med_any = "Any Medical Conditions",
+  H_income1 = "Income: Bottom 25%", H_income2 = "Income: 25–50%", H_income3 = "Income: 50–75%", H_income4 = "Income: Top 25%",
+  black_white = "US: Black vs White", no_col_dip = "No College Diploma",
+  political_match = "R's Party in Power", D_gmistrust_media = "Mistrust Media",
+  D_korea_koreanwar = "Exposure to North Korea", china_west = "China vs West"
+)
+
+group_map <- c(
+  D_female = "Demographics", D_med_any = "Demographics",
+  age_group1 = "Demographics", age_group2 = "Demographics", age_group3 = "Demographics",
+  age_group4 = "Demographics", age_group5 = "Demographics", age_group6 = "Demographics",
+  H_income1 = "Disadvantaged", H_income2 = "Disadvantaged", H_income3 = "Disadvantaged", H_income4 = "Disadvantaged",
+  black_white = "Disadvantaged", no_col_dip = "Disadvantaged",
+  political_match = "Political", D_gmistrust_media = "Political",
+  D_korea_koreanwar = "Political", china_west = "Political"
+)
+
+plot_df <- coef_full %>%
+  mutate(term = factor(term, levels = term_order)) %>%
+  arrange(term) %>%
+  mutate(label = label_map[as.character(term)],
+         group = group_map[as.character(term)])
+
+# === 10. Plot ===
+ggplot(plot_df, aes(x = estimate, y = fct_rev(term), color = group)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "red") +
+  geom_errorbarh(aes(xmin = conf.low, xmax = conf.high), height = 0.2) +
+  geom_point(shape = 18, size = 3) +
+  scale_y_discrete(labels = label_map) +
+  scale_color_manual(values = c(
+    "Demographics" = "maroon",
+    "Disadvantaged" = "navy",
+    "Political" = "forestgreen"
+  )) +
+  coord_cartesian(xlim = c(-0.5, 0.5)) +
+  labs(
+    x = "Coefficient Estimate (95% CI)", 
+    y = NULL, 
+    color = NULL
+  ) +
+  theme_minimal(base_size = 11) +   # << Base size for everything
+  theme(
+    plot.title = element_text(
+      hjust = 0,            # fully left-aligned
+      size = 11,            # exactly same size as base text
+      face = "plain",       # plain, not bold
+      margin = margin(b = 10)  # small margin below title to separate it
+    ),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10),  # remove big side margins
+    legend.position = "none",
+    axis.text.y = element_text(size = rel(1)),  # Keep y-axis (terms) same size
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+```
+
+\newpage
+
+## Instrumental Variable Regressions
+
+### The Kleibergen-Paap F statistic
+
+The authors employ the Kleibergen-Paap F Statistic (KP-F) as their main proxy for estimating the relevance of both instruments.
+In this replication study, it was not directly possible to compute the KP-F statistic because current R packages, including fixest and AER::ivreg(), do not fully implement the necessary reduced-rank singular value decomposition (SVD) computations required for exact KP-F estimation.
+The initial study was done in STATA, which automatically constructs the KP-F, internally applying the correct cluster-robust variance-covariance matrix and adjusting for weak instruments.
+Thus, I used cluster-robust first-stage Wald F-statistics instead for all KP-F estimations (Cameron & Miller, 2015; Windmeijer, 2025).
+In exactly identified settings with one instrument per endogenous regressor, both the KP-F Statistic and the cluster-robust first-stage Wald F-statistics test the same hypothesis and, under heteroskedasticity or clustering, converge numerically because they are asymptotically equivalent (Kleibergen and Paap, 2006).
+Thus, the following proxies for instrument relevance in the following study will be represented by the cluster-robust first-stage Wald F- instead of the KP-F Statistic.
+
+### Using COVID-19 mortality rates in the longitudinal survey
+
+In the first step of the IV replication, the main results for the 2SLS estimation of the longitudinal survey are replicated, using local COVID-19 mortality rates as an instrument for health insecurity.
+To assess the relevance of the instrument, a first-stage regression is conducted, in which health insecurity is regressed on COVID-19 mortality rates.
+Additionally, robustness checks were performed by separately regressing three components of health insecurity, concerns about the health of the elderly, personal health, and healthcare system capacity on COVID-19 mortality.
+All specifications included an extensive set of controls, including demographic covariates, proxies for public health policy responses, fixed effects for survey week and administrative regions, and lagged cumulative COVID-19 mortality.
+Across all first-stage estimations, the cluster-robust Wald F-statistics substantially exceed the Stock-Yogo weak instrument threshold of 10, indicating strong instrument relevance.
+The F-statistic for the main endogenous regressor, health insecurity, is particularly high (117.45), confirming the strength of the instrument (see Appendix \@ref(appendix-table-1---cluster-robost-wald-estimator-calculations-for-the-longitudinal-survey).
+In the next step, naïve OLS regressions of civil liberties outcomes on health insecurities are reported to establish a baseline for the subsequent steps and capture raw correlations, resulting in statistically significant outcomes across all observed outcomes (see Table 1 panel A).
+Subsequently, a reduced form regression was applied, measuring the total effect of the instrument on the outcome, also resulting in statistically significant positive results (see Table 1, panel B).
+Finally, the second stage of the 2SLS procedure is conducted (Table 1, Panel C), using predicted values of health insecurity from the first stage as instruments.
+The 2SLS estimates are uniformly larger in magnitude than the OLS estimates, consistent with classical measurement error or omitted variable bias in the naïve regressions.
+Taken together, the results of the 2SLS estimation indicate an increases in perceived health insecurity, also incorporating relevant cluster-robust Wald F-statistics (see Appendix 8.3.).
+These findings imply that during periods of heightened health threat, individuals become systematically more accepting of restrictions on core civil liberties, supporting the theoretical expectation that existential threats reshape citizens' preferences for rights protections.
+
+```{r table1, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# === 1. Load libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(kableExtra)
+
+# === 2. Load data ===
+df <- read_dta("../2input_data/table2_clean.dta")
+
+# === 3. Setup ===
+# Define outcome, endogenous, instrument, and control variables
+outcomes   <- c("own_rights", "contr_media", "privacy", "democr_procedu")
+endo       <- "health_insecurity"
+iv         <- "log_allmort_rate_a"
+controls   <- c(
+  "log_cummort_rate_a",
+  "factor(maxage_bin)",
+  "D_male",
+  "factor(hhinc_category_nq4)",
+  "college_diploma",
+  "lockdown",
+  "policy_str_moveave3",
+  "govt_trust",
+  "relevel(factor(week), ref='14')"
+)
+ctrl_rhs   <- paste(controls, collapse = " + ")
+fe_absorb  <- "geo_admin1_num"
+vcov_spec  <- "HC1"
+
+# === 4. Initialize results ===
+# Create containers for storing results of each regression type
+ols_results <- list()
+rf_results  <- list()
+iv_results  <- list()
+
+# === 5. Run regressions ===
+for (i in seq_along(outcomes)) {
+  var <- outcomes[i]
+  
+  ## 5.1. OLS
+  f_ols_stage1 <- as.formula(paste0(var, " ~ ", ctrl_rhs, " | ", fe_absorb, " | ", endo, " ~ ", iv))
+  fit_ols <- feols(f_ols_stage1, data = df, vcov = vcov_spec)
+  rows_ols <- fit_ols$obs[[1]]
+  sub_ols <- df[rows_ols, , drop = FALSE]
+  stats_ols <- sub_ols %>% summarise(
+    m = mean(.data[[endo]], na.rm=TRUE),
+    s = sd(.data[[endo]], na.rm=TRUE)
+  )
+  sub_ols <- sub_ols %>% mutate(h_z = (.data[[endo]] - stats_ols$m) / stats_ols$s)
+  f_ols <- as.formula(paste0(var, " ~ h_z + ", ctrl_rhs, " | ", fe_absorb))
+  model_ols <- feols(f_ols, data = sub_ols, vcov = vcov_spec)
+  coef_ols <- tidy(model_ols, conf.int = TRUE) %>% filter(term == "h_z")
+  ols_results[[i]] <- coef_ols
+  
+  ## 5.2. Reduced Form
+  # Compute reduced-form regression using standardized instrument
+  f_rf_stage1 <- as.formula(paste0(var, " ~ ", ctrl_rhs, " | ", fe_absorb, " | ", iv, " ~ ", iv))
+  fit_rf <- feols(f_rf_stage1, data = df, vcov = vcov_spec)
+  rows_rf <- fit_rf$obs[[1]]
+  sub_rf <- df[rows_rf, , drop = FALSE]
+  stats_rf <- sub_rf %>% summarise(
+    m = mean(.data[[iv]], na.rm=TRUE),
+    s = sd(.data[[iv]], na.rm=TRUE)
+  )
+  sub_rf <- sub_rf %>% mutate(h_z = (.data[[iv]] - stats_rf$m) / stats_rf$s)
+  f_rf <- as.formula(paste0(var, " ~ h_z + ", ctrl_rhs, " | ", fe_absorb))
+  model_rf <- feols(f_rf, data = sub_rf, vcov = vcov_spec)
+  coef_rf <- tidy(model_rf, conf.int = TRUE) %>% filter(term == "h_z")
+  rf_results[[i]] <- coef_rf
+  
+  ## 5.3. 2SLS
+  # Compute two-stage least squares estimates using standardized variables
+  f_iv_stage1 <- as.formula(paste0(var, " ~ ", ctrl_rhs, " | ", fe_absorb, " | ", endo, " ~ ", iv))
+  fit_iv <- feols(f_iv_stage1, data = df, vcov = vcov_spec)
+  rows_iv <- fit_iv$obs[[1]]
+  sub_iv <- df[rows_iv, , drop = FALSE]
+  stats_iv <- sub_iv %>% summarise(
+    m_h = mean(.data[[endo]], na.rm = TRUE),
+    s_h = sd(  .data[[endo]], na.rm = TRUE),
+    m_iv = mean(.data[[iv]],   na.rm = TRUE),
+    s_iv = sd(  .data[[iv]],   na.rm = TRUE)
+  )
+  sub_iv <- sub_iv %>% mutate(
+    h_z = (.data[[endo]] - stats_iv$m_h) / stats_iv$s_h,
+    iv_z = (.data[[iv]]   - stats_iv$m_iv) / stats_iv$s_iv
+  )
+  f_iv <- as.formula(paste0(var, " ~ ", ctrl_rhs, " | ", fe_absorb, " | h_z ~ iv_z"))
+  model_iv <- feols(f_iv, data = sub_iv, vcov = vcov_spec)
+  coef_iv <- tidy(model_iv, conf.int = TRUE) %>% filter(term == "fit_h_z")
+  iv_results[[i]] <- coef_iv
+}
+
+# === 6. Manually input Wald stats and observations ===
+# Pre-calculated cluster-robust Wald F-statistics and sample sizes. Those results are taken from appendix table 8.3.
+wald_stats <- c("117.496", "53.116", "67.071", "110.548")
+observations <- c("364735", "72929", "72892", "72901")
+
+# === 7. Build final results table ===
+# Construct LaTeX-ready results table with panels A–C
+table1_data <- data.frame(
+  Outcome = c(
+    "Panel A. OLS estimates", "Health insecurity", "",
+    "Panel B. Reduced form", "COVID-19 incidence", "",
+    "Panel C. 2SLS estimates", "Health insecurity", "",
+    "Cluster-Robust First-Stage Wald F-statistics",
+    "Observations"
+  ),
+  Sacrifice_Rights = c(
+    "",
+    sprintf("%.3f", ols_results[[1]]$estimate),
+    sprintf("(%.3f)", ols_results[[1]]$std.error),
+    "",
+    sprintf("%.3f", rf_results[[1]]$estimate),
+    sprintf("(%.3f)", rf_results[[1]]$std.error),
+    "",
+    sprintf("%.3f", iv_results[[1]]$estimate),
+    sprintf("(%.3f)", iv_results[[1]]$std.error),
+    wald_stats[1],
+    observations[1]
+  ),
+  Free_Press = c(
+    "",
+    sprintf("%.3f", ols_results[[2]]$estimate),
+    sprintf("(%.3f)", ols_results[[2]]$std.error),
+    "",
+    sprintf("%.3f", rf_results[[2]]$estimate),
+    sprintf("(%.3f)", rf_results[[2]]$std.error),
+    "",
+    sprintf("%.3f", iv_results[[2]]$estimate),
+    sprintf("(%.3f)", iv_results[[2]]$std.error),
+    wald_stats[2],
+    observations[2]
+  ),
+  Privacy = c(
+    "",
+    sprintf("%.3f", ols_results[[3]]$estimate),
+    sprintf("(%.3f)", ols_results[[3]]$std.error),
+    "",
+    sprintf("%.3f", rf_results[[3]]$estimate),
+    sprintf("(%.3f)", rf_results[[3]]$std.error),
+    "",
+    sprintf("%.3f", iv_results[[3]]$estimate),
+    sprintf("(%.3f)", iv_results[[3]]$std.error),
+    wald_stats[3],
+    observations[3]
+  ),
+  Democracy = c(
+    "",
+    sprintf("%.3f", ols_results[[4]]$estimate),
+    sprintf("(%.3f)", ols_results[[4]]$std.error),
+    "",
+    sprintf("%.3f", rf_results[[4]]$estimate),
+    sprintf("(%.3f)", rf_results[[4]]$std.error),
+    "",
+    sprintf("%.3f", iv_results[[4]]$estimate),
+    sprintf("(%.3f)", iv_results[[4]]$std.error),
+    wald_stats[4],
+    observations[4]
+  )
+)
+
+# === 8. Render table ===
+kable(
+  table1_data,
+  format = "latex",
+  booktabs = TRUE,
+  col.names = c(
+    "Outcome",
+    "(1) Sacrifice own rights",
+    "(2) Sacrifice free press",
+    "(3) Relax privacy protection",
+    "(4) Suspend democratic procedures"
+  ),
+  align = c("l", rep("c", 4)),
+  caption = "{OLS and 2SLS Results Using COVID{-}19 Mortality Fluctuations}"
+) %>%
+  kable_styling(
+    font_size = 9,
+    latex_options = c("hold_position", "scale_down"),
+    position = "center"
+  ) %>%
+  row_spec(c(1, 4, 7, 10), bold = TRUE)
+
+```
+
+### OLS and 2SLS results for in-depth survey
+
+In the next step, the core results from the in-depth survey were replicated.
+All regressions controlled for demographics (sex, age, education, income, medical vulnerability), concerns about surveillance, strata fixed effects (capturing country-by-hotspot variation), and survey week fixed effects.
+
+In the first stage, it was tested whether public health information treatment influences the perceived health insecurity, resulting in a statistically significant coefficient of 0.128 with a cluster-robust Wald F-statistics of 56.124, which is also above the conventional threshold, confirming a substantial relevance of the instrument (see Appendix \@ref(appendix-table-2-cluster-robust-wald-f-statistic-approximation-for-in-depth-survey).
+As a benchmark, a naïve OLS was estimated as well, resulting in statistically significant coefficients for health insecurity (see Table 2, panel 1).
+The 2SLS estimates, which correct for endogeneity using the randomized treatment as an instrument, are uniformly larger than their OLS counterparts, ranging from 0.160 to 0.348 (Table 2, Panel C).
+This pattern is consistent with classical measurement error models or omitted variable bias pulling OLS estimates toward zero.
+
+```{r table2, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# === 1. Load libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(ggplot2)
+library(forcats)
+library(patchwork)
+library(AER)
+library(sandwich)
+library(lmtest)
+library(kableExtra)
+library(tidyr)
+library(purrr)
+
+# === 2. Load data ===
+df <- read_dta("../2input_data/in_depth_survey.dta") %>%
+  filter(sample_main == 1)
+df <- df %>%
+  mutate(
+    threat_covid_people_orig = threat_covid_people,
+    equipment_orig = equipment
+  )
+
+df <- df %>%
+  mutate(
+    threat_covid_people = as.numeric(scale(threat_covid_people)),        # Standardize threat
+    equipment = as.numeric(scale(equipment))                             # Standardize equipment
+  )
+
+df <- df %>%
+  mutate(
+    endog_healthsecurity = rowMeans(select(., threat_covid_people, equipment),
+                                    na.rm = TRUE),
+    endog_healthsecurity_orig = endog_healthsecurity,
+  )
+
+# === 3. Run regressions ===
+controls_min <- c(
+  "D_hotspot",
+  "D_male",
+  "D_med_any",
+  "factor(age_group)",
+  "factor(week)",
+  "factor(H_income)",
+  "info_later",
+  "D_college_diploma"
+)
+outcomes <- c(
+  "own_rights_bn",     "other_rights_bn", "az_rights",
+  "privacy_bn",        "policy1_1",       "policy2_1",
+  "mitapp",            "az_privacy",
+  "gov_pref_1",        "gov_pref_3",      "contr_media_bn",
+  "gov_pref_4",        "democr_procedu_bn","az_democracy",
+  "policy5_1",         "policy6_1",       "policy7_1",
+  "az_mobility"
+)
+
+ctrl_rhs   <- paste(controls_min, collapse = " + ")
+fe_absorb  <- "country_code"
+vcov_spec  <- "HC1"
+
+
+## 3.1. 2SLS
+results2sls <- list()
+
+# First-stage 2SLS regression
+for(var in outcomes) {
+  f_iv   <- as.formula(paste0(
+    var, " ~ ", ctrl_rhs,
+    " | ", fe_absorb,
+    " | endog_healthsecurity ~ T_popln_health"
+  ))
+  fit_iv <- feols(f_iv, data = df, vcov = vcov_spec)
+  fstat  <- summary(fit_iv, stage = 1)$stat["F"]
+  samp   <- fit_iv$obs[[1]]
+  sub <- df[samp, , drop = FALSE]
+  
+  # Standardize endogenous regressor in sub-sample
+  stats <- sub %>% summarise(
+    m = mean(endog_healthsecurity, na.rm=TRUE),
+    s = sd(  endog_healthsecurity, na.rm=TRUE)
+  ) %>% slice(1)
+  
+  m_val <- stats$m
+  s_val <- stats$s
+  
+  sub <- sub %>% mutate(
+    h_z = (endog_healthsecurity - m_val) / s_val
+  )
+  # Final consolidated 2SLS model
+  f_2sls <- as.formula(paste0(
+    var, " ~ ", ctrl_rhs,
+    " | ", fe_absorb,
+    " | h_z ~ T_popln_health"
+  ))
+  m2sls  <- feols(f_2sls, data = sub, vcov = vcov_spec)
+  td <- tidy(m2sls, conf.int = TRUE) %>% filter(term == "fit_h_z")
+ 
+   # Extract estimates and compute means
+  est <- if(nrow(td)==1) td$estimate else NA_real_
+  se  <- if(nrow(td)==1) td$std.error else NA_real_
+  mean_full <- mean(sub[[var]][ sub$N_treatment==0 ], na.rm=TRUE)
+  
+  if (var %in% c("gov_pref_4","democr_procedu_bn","az_democracy")) {
+    gap <- NA_real_
+  } else {
+    us_mean  <- mean(sub[[var]][ sub$N_treatment==0 & sub$country_code=="USA" ], na.rm=TRUE)
+    ch_mean  <- mean(sub[[var]][ sub$N_treatment==0 & sub$country_code=="CHN" ], na.rm=TRUE)
+    gap      <- ch_mean - us_mean
+  }
+  
+  results2sls[[var]] <- data.frame(
+    Outcome       = var,
+    Est_2SLS      = round(est,  3),
+    SE_2SLS       = round(se,   3),
+    Mean_Outcome  = round(mean_full, 3),
+    Gap_China_USA = round(gap,       3),
+    stringsAsFactors = FALSE
+  )
+}
+tableII2sls <- bind_rows(results2sls)
+
+## 3.2. OLS 
+resultsols <- list()
+
+for(var in outcomes) {
+  # 3.2.1. OLS with original health security regressor
+  f_ols   <- as.formula(paste0(
+    var, " ~ endog_healthsecurity + ", ctrl_rhs,
+    " | ", fe_absorb
+  ))
+  fit_ols <- feols(f_ols, data = df, vcov = vcov_spec)
+  samp   <- fit_ols$obs[[1]]
+  
+  sub <- df[samp, , drop = FALSE]
+  # 3.2.2. Standardise health security for the subsequent step
+  stats <- sub %>% summarise(
+    m = mean(endog_healthsecurity, na.rm=TRUE),
+    s = sd(  endog_healthsecurity, na.rm=TRUE)
+  ) %>% slice(1)
+  
+  m_val <- stats$m
+  s_val <- stats$s
+  
+  sub <- sub %>% mutate(
+    h_z = (endog_healthsecurity - m_val) / s_val
+  )
+  
+  # 3.2.3. Ultimately run regression using standardised regressor
+  f_ols <- as.formula(paste0(
+    var, " ~ h_z +",  ctrl_rhs,
+    " | ", fe_absorb
+  ))
+  ols  <- feols(f_ols, data = sub, vcov = vcov_spec)
+  td <- tidy(ols, conf.int = TRUE) %>% filter(term == "h_z")
+  est <- if(nrow(td)==1) td$estimate else NA_real_
+  se  <- if(nrow(td)==1) td$std.error else NA_real_
+  
+  resultsols[[var]] <- data.frame(
+    Outcome       = var,
+    Est_ols      = round(est,  3),
+    SE_ols       = round(se,   3),
+    stringsAsFactors = FALSE
+  )
+
+}
+
+# === 4. Merge and format estimates ===
+tableIIols <- bind_rows(resultsols)
+tableII <- tableII2sls %>%
+  left_join(tableIIols, by = "Outcome") %>%
+  mutate(
+    Est_ols = ifelse(is.na(Est_ols), 0, Est_ols),
+    SE_ols  = ifelse(is.na(SE_ols), 0, SE_ols)
+  ) %>%
+  mutate(
+    Est_2SLS = paste0(Est_2SLS, " (", SE_2SLS, ")"),
+    Est_ols  = paste0(Est_ols, " (", SE_ols, ")")
+  ) %>%
+  select(Outcome, Est_ols, Est_2SLS, Mean_Outcome, Gap_China_USA) %>%
+  rename(
+    `2SLS Estimate` = Est_2SLS,
+    `OLS Estimate`  = Est_ols,
+    `Mean Outcome`  = Mean_Outcome,
+    `China–USA Gap` = Gap_China_USA
+  )
+# === 5. Extract only z-score outcomes ===
+z_scores_only <- tableII %>%
+  filter(Outcome %in% c("az_rights", "az_privacy", "az_democracy", "az_mobility"))
+
+# === 6. Rename the outcomes for better readability ===
+z_scores_only <- z_scores_only %>%
+  mutate(Outcome = case_when(
+    Outcome == "az_rights" ~ "Willing to sacrifice rights",
+    Outcome == "az_privacy" ~ "Willing to sacrifice privacy",
+    Outcome == "az_democracy" ~ "Willing to curtail democracy",
+    Outcome == "az_mobility" ~ "Willing to give up mobility",
+    TRUE ~ Outcome
+  ))
+
+# === 7. Final table ===
+z_scores_only %>%
+  kable(
+    caption = "Effects of Health Insecurity on Civil Liberties for In-Depth Survey (Z-Score Indices Only)",
+    col.names = c(
+      "Outcome variables", 
+      "Health insecurity (OLS)", 
+      "Health insecurity (2SLS)", 
+      "Mean of outcome", 
+      "Gap between China and United States"
+    ),
+    align = c("l", "c", "c", "c", "c"),
+    escape = FALSE,
+    booktabs = TRUE,
+    format = "latex"
+  ) %>%
+  kable_styling(
+    font_size = 9,
+    latex_options = c("hold_position", "scale_down"),
+    full_width = FALSE,
+    position = "center"
+  ) %>%
+  column_spec(1, width = "2.5in") %>%
+  column_spec(2:5, width = "1in") %>%
+  pack_rows("Overall rights and freedom", 1, 1) %>%
+  pack_rows("Protection of privacy", 2, 2) %>%
+  pack_rows("Democratic rights and institutions", 3, 3) %>%
+  pack_rows("Rights to movement", 4, 4) %>%
+  add_header_above(c(" " = 1, "Coefficient estimates" = 2, " " = 2)) %>%
+  footnote(
+    general = paste("Health insecurity is standardized to mean 0 and SD 1. All regressions include controls for demographics,",
+                    "concerns about surveillance, strata fixed effects, and survey week fixed effects.",
+                    "First stage F-statistics range from 56.12 to 58.44."),
+    threeparttable = TRUE
+  )
+```
+
+# Critical Evaluation and Extension
+
+## General Remarks
+
+Overall the authors demonstrated a high level of methodological sophistication in their paper.
+Their identification strategy directly adressed endogeneity concerns and tested instrumental relevance and ignorability through several robustness checks.
+Additionally the paper connected the observed behavioural patterns with real-world behaviour via the validation study, overall leaving little room for improvement.
+Nevertheless there are two critical aspects which should be addressed, in particular concerning the longitudinal survey and the usage of COVID-19 mortality rates as an instrument.
+In the paper, it is argued that mortality rates are used as opposed to COVID-19 case numbers as the case numbers could be less accurate.
+Nevertheless, both cases and death numbers were inaccurately reported, as underlined by a sample check, comparing the reported mortality rates from their paper with the actual mortality rates from Germany, thereby invalidating their initial argumentation (see Appendix 8.4.).
+Despite COVID-19 mortality rates having shown to be more prevalent to individuals when it comes to insecurities, COVID-19 cases have been previously used in similar instrumental variable designs, thereby resulting in the necessity to test this as an instrument as well before dismissing it (Qiu et al., 2020).
+Furthermore, the authors only show the instrumental relevance across countries for the in-depth survey, leaving room for further exploration.
+
+## First stage by country (longitudinal survey)
+
+To observe first-stage variation across countries, the first-stage regressions was conducted, using fixed-effects by administrative districts and week fixed effects.
+Subsequently, the coefficients, cluster-robust Wald F statistics and the amount of observations were extracted.
+
+The results reveal considerable heterogeneity in the strength of the instrument across countries (see Figure 2). While Spain (F = 18.93) and Australia (F = 11.23) meet or exceed the conventional threshold for instrument relevance ($F \geq 10$) in combination with statistically significant coefficients, the vast majority of countries fall far below this benchmark.
+For example, France (F = 0.53), Germany (F = 0.34), Sweden (F = 0.33), and the United Kingdom (F = 0.17) all exhibit extremely weak first-stage performance.
+Even the United States, which contributes a large share of the total sample, shows only modest instrument strength (F = 5.93).
+In many countries, the estimated coefficient on excess mortality is small, imprecise, and statistically insignificant.
+
+The weakness of the instrument within individual countries reflects limited subnational variation in excess mortality, likely due to centralized policy implementation and uniform national reporting standards.
+While the original paper leverages pooled cross-country variation to establish instrument relevance, this approach assumes sufficient identifying power exists globally, not necessarily within each country.
+My disaggregated analysis reveals that, in most countries, the instrument fails to meet the conventional F-statistic threshold of 10, indicating weak first-stage identification.
+This raises concerns about the validity of country-specific estimates and suggests that the strength of the instrument is largely driven by cross-country rather than within-country variation.
+Consequently, while the pooled model may appear robust, its findings should be interpreted with caution in national contexts.
+
+
+```{r figure2, fig.cap='Graphical representation of country-specific fixed first-stage regressions in the longitudinal survey', echo=FALSE, fig.width=5, fig.height=4}
+# === 1. Load Libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(tibble)
+library(purrr)
+library(ggplot2)
+library(viridis)
+
+# === 2. Load Data ===
+df <- read_dta("../2input_data/table2_clean.dta")
+
+# === 3. Define Variables ===
+controls <- c(
+  "log_cummort_rate_a", "D_male", "maxage_bin",
+  "factor(hhinc_category_nq4)", "college_diploma",
+  "lockdown", "policy_str_moveave3", "govt_trust",
+  "factor(week)"
+)
+health_vars <- c("health_insecurity")
+
+# === 4. Loop Across Countries and Variables ===
+results_for_plot <- df %>%
+  filter(!is.na(country)) %>%
+  split(.$country) %>%
+  map_dfr(~{
+    country_data <- .
+    country_name <- unique(country_data$country)
+    
+    # Only using health_insecurity as the DV
+    var <- "health_insecurity"
+    
+    needed_vars <- c(var, "log_allmort_rate_a", "log_cummort_rate_a", "D_male",
+                     "maxage_bin", "hhinc_category_nq4", "college_diploma",
+                     "lockdown", "policy_str_moveave3", "govt_trust", "week", "geo_admin1_num")
+    
+    df_clean <- country_data %>%
+      filter(across(all_of(needed_vars), ~ !is.na(.))) %>%
+      mutate(
+        iv_z = scale(log_allmort_rate_a)[, 1],
+        dv_z = scale(.data[[var]])[, 1]
+      )
+    
+    if (nrow(df_clean) < 50) {
+      return(tibble(
+        Country = country_name,
+        Coefficient = NA,
+        SE = NA,
+        Fstat = NA,
+        Observations = NA,
+        Stars = ""
+      ))
+    }
+    
+    model <- feols(dv_z ~ iv_z + log_cummort_rate_a + D_male + maxage_bin +
+                     factor(hhinc_category_nq4) + college_diploma + lockdown +
+                     policy_str_moveave3 + govt_trust | geo_admin1_num + factor(week),
+                   data = df_clean, cluster = ~geo_admin1_num)
+    
+    coef_val <- coef(model)["iv_z"]
+    se_val   <- se(model)["iv_z"]
+    p_val    <- pvalue(model)["iv_z"]
+    
+    # Determine significance stars
+    stars <- case_when(
+      p_val < 0.001 ~ "***",
+      p_val < 0.01  ~ "**",
+      p_val < 0.05  ~ "*",
+      TRUE          ~ ""
+    )
+    
+    # Extract Wald F-statistic
+    wald_stat <- tryCatch({
+      w <- capture.output(wald(model, keep = "iv_z"))
+      stat_line <- grep("stat =", w, value = TRUE)
+      stat_value <- as.numeric(gsub(".*stat = ([0-9.]+).*", "\\1", stat_line))
+      round(stat_value, 2)
+    }, error = function(e) NA)
+    
+    obs <- nobs(model)
+    
+    tibble(
+      Country = country_name,
+      Coefficient = coef_val,  # Raw coefficient value for plotting
+      SE = se_val,
+      Fstat = wald_stat,
+      Observations = obs,
+      Stars = stars
+    )
+  })
+
+# Create country abbreviations and augment the data
+country_abbr <- c(
+  "Australia" = "AUS", 
+  "Canada" = "CAN", 
+  "France" = "FRA", 
+  "Germany" = "DEU", 
+  "India" = "IND", 
+  "Italy" = "ITA", 
+  "Japan" = "JPN", 
+  "Netherlands" = "NLD", 
+  "Spain" = "ESP", 
+  "Sweden" = "SWE", 
+  "United Kingdom" = "GBR", 
+  "US" = "USA"
+)
+
+# Ensure the data is properly prepared for plotting
+plot_data <- results_for_plot %>%
+  filter(!is.na(Coefficient) & !is.na(Fstat)) %>%
+  mutate(Abbr = country_abbr[Country],
+         # Create labels with stars for the plot points
+         PointLabel = ifelse(Stars != "", paste0(Abbr, Stars), Abbr))
+
+# Generate better differentiable colors using viridis palette
+n_countries <- nrow(plot_data)
+country_colors <- viridis_pal(option = "turbo")(n_countries)  # Using turbo for maximum differentiation
+names(country_colors) <- plot_data$Abbr
+
+# === 5. Create Scatterplot ===
+p <- ggplot(plot_data, aes(x = Coefficient, y = Fstat, color = Abbr)) +
+  # Add reference lines
+  geom_hline(yintercept = 10, linetype = "dashed", color = "darkgray", alpha = 0.7) +
+  geom_vline(xintercept = 0, linetype = "dotted", color = "darkgray", alpha = 0.7) +
+  
+  # Add the threshold annotation
+  annotate("text", x = min(plot_data$Coefficient) + 0.01, y = 11, 
+           label = "Stock & Yogo (2006) threshold", 
+           hjust = 0, size = 3, color = "darkgray") +
+  
+  # Add points with significance stars
+  geom_point(aes(shape = Stars != ""), size = 4, alpha = 0.8) +
+  scale_shape_manual(values = c(16, 17), guide = "none") +  # Different shapes for significant vs non-significant
+  
+  # Set color scale for country abbreviations only
+  scale_color_manual(values = country_colors) +
+  
+  # Customize theme
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 9),
+    legend.key.size = unit(0.8, "lines"),
+    axis.title = element_text(size = 11),
+    axis.text = element_text(size = 9),
+    plot.title = element_blank(),  # Remove the title
+    plot.subtitle = element_blank(),  # Remove the subtitle
+    plot.caption = element_text(size = 8, hjust = 0),
+    panel.grid.minor = element_blank()
+  ) +
+  
+  # Add labels (without title/subtitle)
+  labs(
+    x = "First-Stage Coefficient",
+    y = "Cluster-Robust Wald F-Statistic",
+    caption = "Note. Points marked with triangles indicate statistically significant coefficients.\n* p<0.05, ** p<0.01, *** p<0.001"
+  ) +
+  
+  # Adjust axis limits if needed
+  coord_cartesian(ylim = c(0, max(plot_data$Fstat) * 1.1)) +
+  
+  # Make the legend display in multiple columns
+  guides(color = guide_legend(ncol = 6))
+
+# Print the plot
+p
+```
+
+\newpage
+
+## Cases as Instruments (longitudinal survey)
+
+To assess the potential of cases as an alternative instrument for health insecurity, I decided to only focus on one country, to estimate a proxy for the whole sample.
+For this purpose, I created a large data set, based on the official numbers by the Robert Koch Institute, capturing all recorded COVID cases in each German county between the 30th of March 2020 and April 2021.
+The case data was prepared in the same manner as the COVID-19 mortality data, thereby subdividing the weekly amount of cases by the population of the county and estimating the number per 1000 individuals and taking the natural logarithm of this number.
+In addition, a cumulated number of cases was created in the same manner, to match the structure of the original mortality data set.
+Across all four outcomes, health insecurity, fear for elderly health, personal health fear, and concerns about healthcare capacity, the estimated coefficients are relatively close between the two instruments, suggesting they capture similar underlying variation in perceived health threat.
+However, the statistical strength of both instruments is weak when used in isolation at the national level.
+Cluster-robust Wald F-statistics for both mortality and cases fall below the conventional rule-of-thumb threshold of 10, indicating a potential weak instrument problem.
+This is particularly evident for overall health insecurity, where F-statistics fall below 1 for both instruments, and even in the most promising case (healthcare capacity), neither instrument exceeds a value of 4.
+
+Although COVID-19 cases yield marginally higher cluster-rubust Wald F-statistics in some outcomes (e.g., personal health), they do not consistently outperform mortality in terms of predictive power.
+The results suggest that, within a single-country setting like Germany, both instruments lack sufficient exogenous variation to strongly predict perceptions of health threat.
+This could be due to the centralized and uniform nature of public health messaging and pandemic dynamics within countries, which limits regional variation that an instrument could exploit.
+
+These findings underscore the importance of carefully testing instrument strength in country-specific applications, rather than assuming relevance based on pooled multi-country analyses.
+To further investigate the comparative strength of cases versus mortality as instruments, future research should formally test for weak instruments using metrics like the cluster-robust Wald F-statistic, assess instrument performance in alternative specifications (e.g., including regional interactions or using lagged values), and examine whether reporting biases in mortality or case data affect instrument validity.
+Testing these instruments across multiple countries with varying institutional and reporting structures would also help clarify under what conditions each performs more reliably.
+
+```{r table4, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+
+# === 1: Load libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(kableExtra)
+library(tibble)
+
+# === 2: Load data ===
+df <- read_dta("../2input_data/Updated_Data_cleaned.dta")
+
+# === 3: Define variables ===
+controls_mort <- c("log_cummort_rate_a", "D_male", "maxage_bin", "hhinc_category_nq4", 
+                   "college_diploma", "lockdown", "policy_str_moveave3", "govt_trust", 
+                   "week", "geo_admin1_num")
+
+controls_cases <- c("log_cumcases_rate_a", "D_male", "maxage_bin", "hhinc_category_nq4", 
+                    "college_diploma", "lockdown", "policy_str_moveave3", "govt_trust", 
+                    "week", "geo_admin1_num")
+
+health_vars <- c("health_insecurity", "elderly_health_fear", "personal_health_fear", "health_care_fear")
+
+# === 4: Estimate mortality regressions ===
+results_mort <- list()
+for (var in health_vars) {
+  vars <- c(var, "log_allmort_rate_a", controls_mort)
+  df_mort <- df %>%
+    filter(across(all_of(vars), ~ !is.na(.))) %>%
+    mutate(iv_z = scale(log_allmort_rate_a)[, 1],
+           dv_z = scale(.data[[var]])[, 1])
+  
+  model <- feols(dv_z ~ iv_z + log_cummort_rate_a + D_male + maxage_bin + 
+                   factor(hhinc_category_nq4) + college_diploma + lockdown +
+                   policy_str_moveave3 + govt_trust |
+                   geo_admin1_num + factor(week),
+                 data = df_mort, cluster = ~geo_admin1_num)
+  
+  invisible(capture.output(wald_out <- wald(model, keep = "iv_z")))
+
+  p <- pvalue(model)["iv_z"]
+  stars <- if (p < 0.001) "\\textsuperscript{***}" else if (p < 0.01) "\\textsuperscript{**}" else if (p < 0.05) "\\textsuperscript{*}" else ""
+
+  results_mort[[var]] <- tibble(
+    Coef = sprintf("%.3f%s", coef(model)["iv_z"], stars),
+    SE = sprintf("(%.3f)", se(model)["iv_z"]),
+    Fstat = round(as.numeric(wald_out$stat), 2),
+    Obs = nobs(model)
+  )
+}
+table_mort <- bind_rows(results_mort)
+
+# === 5: Estimate cases regressions ===
+results_cases <- list()
+for (var in health_vars) {
+  vars <- c(var, "log_allcases_rate_a", controls_cases)
+  df_case <- df %>%
+    filter(across(all_of(vars), ~ !is.na(.))) %>%
+    mutate(iv_z = scale(log_allcases_rate_a)[, 1],
+           dv_z = scale(.data[[var]])[, 1])
+  
+  model <- feols(dv_z ~ iv_z + log_cumcases_rate_a + D_male + maxage_bin + 
+                   factor(hhinc_category_nq4) + college_diploma + lockdown +
+                   policy_str_moveave3 + govt_trust |
+                   geo_admin1_num + factor(week),
+                 data = df_case, cluster = ~geo_admin1_num)
+  
+  invisible(capture.output(wald_out <- wald(model, keep = "iv_z")))
+
+  p <- pvalue(model)["iv_z"]
+  stars <- if (p < 0.001) "\\textsuperscript{***}" else if (p < 0.01) "\\textsuperscript{**}" else if (p < 0.05) "\\textsuperscript{*}" else ""
+
+  results_cases[[var]] <- tibble(
+    Coef = sprintf("%.3f%s", coef(model)["iv_z"], stars),
+    SE = sprintf("(%.3f)", se(model)["iv_z"]),
+    Fstat = round(as.numeric(wald_out$stat), 2),
+    Obs = nobs(model)
+  )
+}
+table_cases <- bind_rows(results_cases)
+
+# === 6: Combine final table ===
+final_table <- rbind(
+  c("IV Coefficient (Mortality)", table_mort$Coef),
+  c("Standard Error",              table_mort$SE),
+  c("Wald F-statistic",            table_mort$Fstat),
+  c("Observations",                table_mort$Obs),
+  c("IV Coefficient (Cases)",      table_cases$Coef),
+  c("Standard Error",              table_cases$SE),
+  c("Wald F-statistic",            table_cases$Fstat),
+  c("Observations",                table_cases$Obs)
+)
+
+# === 7: Output LaTeX-safe table ===
+
+kable(
+  final_table,
+  caption = "IV Regressions Using COVID-19 Mortality and Case Rates as Instruments (Germany)",
+  format = "latex",
+  booktabs = TRUE,
+  escape = FALSE,
+  col.names = c(" ", "Health (1)", "Elderly (2)", "Personal (3)", "Healthcare (4)"),
+  align = c("l", rep("c", 4)),
+  linesep = ""
+) %>%
+  kable_styling(
+    font_size = 9,  # Increased from 7 to 9
+    latex_options = c("hold_position", "scale_down"),
+    position = "center"
+  ) %>%
+  row_spec(1, bold = TRUE) %>%
+  row_spec(5, bold = TRUE) %>%
+  add_footnote(
+    "*** Note. This table depicts first stage regressions using only German data, comparing log COVID-19 mortality rates and cases per 1000 individuals as an instrument. Models include region and week fixed effects. p<0.001, ** p<0.01, * p<0.05. ", 
+    notation = "none"
+  )
+```
+
+# Conclusion
+
+This paper replicates and extends Alsan et al. (2023), confirming that greater perceived health insecurity during the COVID-19 pandemic is associated with increased support for restrictions on civil liberties.
+The replication broadly supports the original findings, with 2SLS estimates consistently larger than OLS results.
+
+However, the analysis also reveals that the strength of the instruments varies across countries.
+In many national subsamples, the instruments do not meet conventional relevance thresholds, suggesting that identification relies heavily on cross-country variation.
+Alternative specifications using COVID-19 case rates show similar limitations.
+
+Overall, the results support the original conclusion that health threats influence public attitudes toward rights, but also highlight the need for caution when interpreting causal claims at the national level.
+
+\newpage
+
+# Bibliography
+
+Alsan, M., Braghieri, L., Eichmeyer, S., Kim, M. J., Stantcheva, S., & Yang, D. Y.
+(2023).
+Civil liberties in times of crisis.
+American Economic Journal: Applied Economics, 15(4), 389-421.
+<https://doi.org/10.1257/app.20210736>
+
+Angrist, J. D., Imbens, G. W., & Rubin, D. B.
+(1996).
+Identification of causal effects using instrumental variables.
+Journal of the American statistical Association, 91(434), 444-455.
+<https://doi.org/10.2307/2291629>
+
+Cameron, A. C., & Miller, D. L.
+(2015).
+A practitioner’s guide to cluster-robust inference.
+Journal of human resources, 50(2), 317-372.
+<https://doi.org/10.3368/jhr.50.2.317>
+
+Kleibergen, F., & Paap, R.
+(2006).
+Generalized reduced rank tests using the singular value decomposition.
+Journal of econometrics, 133(1), 97-126.
+<https://doi.org/10.1016/j.jeconom.2005.02.011>
+
+Qiu, Y., Chen, X., & Shi, W.
+(2020).
+Impacts of social and economic factors on the transmission of coronavirus disease 2019 (COVID-19) in China.
+Journal of population economics, 33, 1127-1172.
+<https://doi.org/10.1007/s00148-020-00778-2>
+
+Stock, J. H., & Yogo, M.
+(2002).
+Testing for weak instruments in linear IV regression.
+In: National Bureau of Economic Research Cambridge, Mass., USA.
+<https://doi.org/10.3386/t0284>
+
+Windmeijer, F.
+(2025).
+The robust F-statistic as a test for weak instruments.
+Journal of econometrics, 247, 105951.
+<https://doi.org/10.1016/j.jeconom.2025.105951>
+
+\newpage
+
+# Appendix
+
+## Appendix Figure 1 - Experimental Flow of Alsan et al. (2023)
+
+```{r appendixfig1, echo=FALSE}
+library(DiagrammeRsvg)
+library(rsvg)
+library(DiagrammeR)
+
+# Create diagram
+g <- DiagrammeR::grViz("
+digraph research_design {
+  graph [layout = dot, rankdir = TB, fontname = 'Arial', nodesep = 0.5, ranksep = 0.5]
+  node [shape = plaintext, fontname = 'Arial', fontsize = 14]
+  node [shape = rect, style = 'rounded,filled', fontname = 'Arial',
+        fontsize = 12, color = '#1a3a5f', penwidth = 1.2,
+        fillcolor = 'white', width = 3.5, height = 0.8]
+  edge [color = 'black', arrowsize = 0.8]
+  figure_title -> data [style=invis]
+  data [label = 'Data Collection']
+  longsurv [label = 'Longitudinal Survey\\n13 countries:\\nn = 534,657']
+  indepth [label = 'In-depth Survey\\n7 countries:\\nn = 13,352']
+  validate [label = 'Analysing health insecurity and associated factors']
+  long_label [label = 'Longitudinal Survey Evaluation']
+  ivmort [label = 'Instrument:\\nWeekly COVID-19 Mortality']
+  first [label = 'First Stage: Health Insecurity']
+  second [label = 'Second Stage: Civil Liberties\\nOutcomes']
+  exp_label [label = 'In-depth Survey Evaluation']
+  descript [label = 'Instrument:\\nDescription on health insecurities']
+  randomise [label = 'Randomisation']
+  control [label = 'Control Group:\\nNo information']
+  treatment [label = 'Treatment Group:\\nRandomised information provision']
+  ivanalysis [label = 'IV Analysis with outcomes']
+  robust_label [label = 'Robustness and Validation']
+  region [label = 'Region / Country\\nfixed effects']
+  indiv [label = 'Individual fixed\\neffects']
+  altern [label = 'Alternative\\nInstruments']
+  validsurvey [label = 'Validation survey']
+  data -> longsurv
+  data -> indepth
+  longsurv -> validate
+  indepth -> validate
+  validate -> long_label
+  validate -> exp_label
+  long_label -> ivmort
+  ivmort -> first
+  first -> second
+  exp_label -> descript
+  descript -> randomise
+  randomise -> control
+  randomise -> treatment
+  control -> ivanalysis
+  treatment -> ivanalysis
+  second -> robust_label
+  ivanalysis -> robust_label
+  robust_label -> region
+  robust_label -> indiv
+  robust_label -> altern
+  robust_label -> validsurvey
+  {rank=same; longsurv; indepth}
+  {rank=same; long_label; exp_label}
+  {rank=same; control; treatment}
+  {rank=same; region; indiv; altern; validsurvey}
+}
+")
+# Export to SVG -> PNG -> include as image
+g_svg <- export_svg(g)
+g_png <- rsvg_png(charToRaw(g_svg), file = "figure1.png")
+knitr::include_graphics("figure1.png")
+
+```
+
+## Appendix Table 1 - Cluster-Robost Wald Estimator calculations for the longitudinal survey
+
+```{r appendix_table1, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# === 1. Load Libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(kableExtra)
+library(tibble)
+
+# === 2. Load Data ===
+df <- read_dta("../2input_data/table2_clean.dta")
+
+# === 3. Define Controls and Variables ===
+controls <- c(
+  "log_cummort_rate_a", "D_male", "maxage_bin",
+  "factor(hhinc_category_nq4)", "college_diploma",
+  "lockdown", "policy_str_moveave3", "govt_trust",
+  "factor(week)"
+)
+health_vars <- c("health_insecurity", "elderly_health_fear", "personal_health_fear", "health_care_fear")
+
+# === 4. Run First-Stage Models and Extract Results ===
+results <- list()
+
+for (var in health_vars) {
+  needed_vars <- c(var, "log_allmort_rate_a", "log_cummort_rate_a", "D_male",
+                   "maxage_bin", "hhinc_category_nq4", "college_diploma",
+                   "lockdown", "policy_str_moveave3", "govt_trust", "week", "geo_admin1_num")
+
+  df_clean <- df %>%
+    filter(across(all_of(needed_vars), ~ !is.na(.))) %>%
+    mutate(
+      iv_z = scale(log_allmort_rate_a)[, 1],
+      dv_z = scale(.data[[var]])[, 1]
+    )
+
+  model <- suppressWarnings(
+    feols(dv_z ~ iv_z + log_cummort_rate_a + D_male + maxage_bin +
+            factor(hhinc_category_nq4) + college_diploma +
+            lockdown + policy_str_moveave3 + govt_trust |
+            geo_admin1_num + factor(week),
+          data = df_clean, cluster = ~geo_admin1_num)
+  )
+
+  coef_val <- coef(model)["iv_z"]
+  se_val   <- se(model)["iv_z"]
+  p_val    <- pvalue(model)["iv_z"]
+  stars    <- case_when(
+    p_val < 0.001 ~ "***",
+    p_val < 0.01  ~ "**",
+    p_val < 0.05  ~ "*",
+    TRUE          ~ ""
+  )
+
+  suppressMessages(suppressWarnings(capture.output({
+    wald_out <- wald(model, keep = "iv_z")
+  })))
+  f_stat <- as.numeric(wald_out$stat)
+  obs    <- nobs(model)
+
+  results[[var]] <- tibble(
+    Coef_Star = sprintf("%.3f%s", coef_val, stars),
+    SE        = sprintf("(%.3f)", se_val),
+    Fstat     = round(f_stat, 3),
+    Observations = obs
+  )
+}
+
+table_data <- bind_rows(results)
+
+# === 5. Add manual caption (no auto-numbering) ===
+cat("\\begin{table}[H]\\centering\n")
+cat("\\begin{center}\\textbf{Appendix Table 1.} Cluster-Robust Wald Estimator calculations for the longitudinal survey\\end{center}\n")
+
+# === 6. Display table ===
+print(
+  kable(
+    rbind(
+      c("COVID-19 incidence", table_data$Coef_Star),
+      c("", table_data$SE),
+      c("Cluster-Robust Wald F Statistic", table_data$Fstat),
+      c("Observations", table_data$Observations)
+    ),
+    format = "latex",
+    booktabs = TRUE,
+    col.names = c("", 
+                  "Health insecurity (1)", 
+                  "Health of elderly (2)", 
+                  "Personal health (3)", 
+                  "Healthcare capacity (4)"),
+    align = c("l", rep("c", 4)),
+    linesep = ""
+  ) %>%
+    kable_styling(
+      latex_options = c("hold_position", "striped"),
+      full_width = TRUE,
+      position = "center",
+      font_size = 10
+    ) %>%
+    row_spec(1, bold = TRUE)
+)
+
+# === 7. Table note ===
+cat("\\begin{flushleft}\n")
+cat("\\small Note: This table presents first-stage IV regressions using excess COVID-19 mortality as an instrument for four different perceived health threat outcomes.\n")
+cat("All models include controls and fixed effects as in the main specification, and standard errors are clustered at the administrative region level.\n")
+cat("*** p<0.001, ** p<0.01, * p<0.05 indicate statistical significance levels.\n")
+cat("\\end{flushleft}\n")
+cat("\\end{table}\n")
+```
+
+## Appendix Table 2 - Cluster-robust Wald F Statistic approximation for in-depth survey
+
+```{r appendix_table2, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# === 1. Load Libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(kableExtra)
+library(tibble)
+
+# === 2. Load and Prepare Data ===
+df <- read_dta("../2input_data/in_depth_survey.dta") %>%
+  filter(sample_main == 1) %>%
+  mutate(
+    threat_covid_people_orig = threat_covid_people,
+    equipment_orig = equipment,
+    threat_covid_people = as.numeric(scale(threat_covid_people)),
+    equipment = as.numeric(scale(equipment)),
+    endog_healthsecurity = rowMeans(across(c(threat_covid_people, equipment)), na.rm = TRUE),
+    endog_healthsecurity_orig = endog_healthsecurity,
+    threat_covid_people = threat_covid_people_orig,
+    equipment = equipment_orig
+  )
+
+# === 3. Define Variables ===
+health_vars <- c("endog_healthsecurity", "threat_covid_people", "equipment")
+iv_var <- "T_popln_health"
+
+controls_raw <- c(
+  "D_hotspot", "D_male", "D_med_any",
+  "age_group", "week", "H_income",
+  "info_later", "D_college_diploma"
+)
+
+ctrl_rhs <- paste(
+  "D_hotspot + D_male + D_med_any +",
+  "factor(age_group) + factor(week) + factor(H_income) +",
+  "info_later + D_college_diploma"
+)
+
+fe_absorb <- "country_code"
+vcov_spec <- "HC1"
+
+# === 4. Run First-Stage Models and Extract Results ===
+results <- list()
+
+for (var in health_vars) {
+  suppressMessages(suppressWarnings({
+    needed <- c(var, iv_var, controls_raw)
+    df_clean <- df %>%
+      filter(if_all(all_of(needed), ~ !is.na(.)))
+    
+    stats <- df_clean %>%
+      summarise(
+        mean_var = mean(.data[[var]], na.rm = TRUE),
+        sd_var   = sd(.data[[var]], na.rm = TRUE)
+      ) %>% slice(1)
+    
+    mu_var <- stats$mean_var
+    sigma_var <- stats$sd_var
+    
+    df_clean <- df_clean %>%
+      mutate(dv_z = (.data[[var]] - mu_var) / sigma_var)
+    
+    formula_stage1 <- as.formula(paste0(
+      "dv_z ~ ", iv_var, " + ", ctrl_rhs, " | ", fe_absorb
+    ))
+    
+    model <- feols(formula_stage1, data = df_clean, vcov = vcov_spec)
+    
+    coef_val <- coef(model)[iv_var]
+    se_val   <- se(model)[iv_var]
+    p_val    <- pvalue(model)[iv_var]
+    stars <- case_when(
+      p_val < 0.001 ~ "***",
+      p_val < 0.01  ~ "**",
+      p_val < 0.05  ~ "*",
+      TRUE          ~ ""
+    )
+
+    suppressMessages(suppressWarnings(capture.output({
+      wald_out <- wald(model, keep = iv_var)
+    })))
+    
+    f_stat <- as.numeric(wald_out$stat)
+    obs <- nobs(model)
+    
+    results[[var]] <- tibble(
+      Coef_Star = sprintf("%.3f%s", coef_val, stars),
+      SE        = sprintf("(%.3f)", se_val),
+      Fstat     = round(f_stat, 2),
+      Observations = obs
+    )
+  }))
+}
+
+table_data <- bind_rows(results)
+
+# === 5. Custom title (suppress auto-numbering) ===
+cat("\\begin{table}[H]\\centering\n")
+cat("\\begin{center}\\textbf{Appendix Table 2.} Cluster-robust Wald F Statistic approximation for in-depth survey\\end{center}\n")
+
+# === 6. Display table ===
+print(
+  kable(
+    rbind(
+      c("Public health treatment", table_data$Coef_Star),
+      c("", table_data$SE),
+      c("Cluster-robust Wald F-statistic", table_data$Fstat),
+      c("Observations", table_data$Observations)
+    ),
+    format = "latex",
+    booktabs = TRUE,
+    col.names = c("", 
+                  "Health insecurity (1)", 
+                  "Threat to population health (2)", 
+                  "Hospital equipment shortages (3)"),
+    align = c("l", rep("c", 3)),
+    linesep = ""
+  ) %>%
+    kable_styling(
+      latex_options = c("hold_position", "striped"),
+      full_width = TRUE,
+      position = "center",
+      font_size = 10
+    ) %>%
+    row_spec(1, bold = TRUE)
+)
+
+# === 7. Table note ===
+cat("\\begin{flushleft}\n")
+cat("\\small Note. This table reports first-stage IV regressions for the in-depth survey, using randomized public health information exposure as an instrument.\n")
+cat("Dependent variables reflect standardized indices of perceived health threats. Models include demographic and policy controls, country and week fixed effects.\n")
+cat("*** p<0.001, ** p<0.01, * p<0.05 denote statistical significance.\n")
+cat("\\end{flushleft}\n")
+cat("\\end{table}\n")
+```
+
+## Appendix Table 3 - Cluster-robust Wald F-Statistic estimation for 2SLS (longitudinal surve)
+
+```{r appendix_table3, echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+# === 1. Load libraries ===
+library(haven)
+library(dplyr)
+library(fixest)
+library(broom)
+library(kableExtra)
+library(tibble)
+library(purrr)
+
+# === 2. Load data ===
+df <- read_dta("../2input_data/table2_clean.dta")
+
+# === 3. Define model components ===
+outcomes <- c("own_rights", "contr_media", "privacy", "democr_procedu")
+endo     <- "health_insecurity"
+iv       <- "log_allmort_rate_a"
+controls <- c(
+  "log_cummort_rate_a",
+  "factor(maxage_bin)",
+  "D_male",
+  "factor(hhinc_category_nq4)",
+  "college_diploma",
+  "lockdown",
+  "policy_str_moveave3",
+  "govt_trust",
+  "relevel(factor(week), ref='14')"
+)
+ctrl_rhs  <- paste(controls, collapse = " + ")
+fe_absorb <- "geo_admin1_num"
+
+# === 4. Run first-stage models and extract F-stats ===
+iv_results <- list()
+for (var in outcomes) {
+  rows_subset <- which(!is.na(df[[var]]))
+  sub <- df[rows_subset, , drop = FALSE]
+
+  f_1st <- as.formula(paste0(
+    endo, " ~ ", iv, " + ", ctrl_rhs, " | ", fe_absorb
+  ))
+  model_1st <- feols(f_1st, data = sub, cluster = ~geo_admin1_num)
+
+  suppressMessages(suppressWarnings(capture.output({
+    wald_out <- wald(model_1st, keep = iv)
+  })))
+  f_stat <- as.numeric(wald_out$stat)
+
+  stats <- sub %>% summarise(
+    m_h  = mean(.data[[endo]], na.rm = TRUE),
+    s_h  = sd(.data[[endo]], na.rm = TRUE),
+    m_iv = mean(.data[[iv]], na.rm = TRUE),
+    s_iv = sd(.data[[iv]], na.rm = TRUE)
+  ) %>% slice(1)
+
+  sub <- sub %>% mutate(
+    h_z  = (.data[[endo]] - stats$m_h) / stats$s_h,
+    iv_z = (.data[[iv]] - stats$m_iv) / stats$s_iv
+  )
+
+  f_2sls <- as.formula(paste0(
+    var, " ~ ", ctrl_rhs, " | ", fe_absorb, " | h_z ~ iv_z"
+  ))
+  m2sls <- feols(f_2sls, data = sub, vcov = ~geo_admin1_num)
+
+  iv_results[[var]] <- tibble(
+    Outcome = case_when(
+      var == "own_rights" ~ "Sacrifice own rights",
+      var == "contr_media" ~ "Sacrifice free press",
+      var == "privacy" ~ "Relax privacy protections",
+      var == "democr_procedu" ~ "Suspend democratic procedures"
+    ),
+    F_stat = round(f_stat, 3),
+    Observations = nobs(m2sls)
+  )
+}
+
+results_table <- bind_rows(iv_results)
+
+# === 5. Output table without LaTeX numbering ===
+cat("\\begin{table}[H]\\centering\n")
+cat("\\begin{center}\\textbf{Appendix Table 3.} First-Stage Cluster-Robust Wald F-Statistics by Outcome\\end{center}\n")
+cat("\\small\n")
+cat("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}lcc}\\toprule\n")
+cat("Outcome & Cluster-Robust Wald F-statistic & Observations \\\\ \\midrule\n")
+
+for (i in 1:nrow(results_table)) {
+  cat(sprintf("%s & %s & %s \\\\\n",
+              results_table$Outcome[i],
+              results_table$F_stat[i],
+              results_table$Observations[i]))
+}
+
+cat("\\bottomrule\n\\end{tabular*}\n")
+cat("\\begin{flushleft}\n")
+cat("\\small Note. This table reports the strength of the instrument (excess COVID-19 mortality) for each outcome variable using cluster-robust Wald F-statistics from first-stage IV regressions.\n")
+cat("All models include fixed effects for administrative regions and weeks, and control for demographic and policy variables.\n")
+cat("An F-statistic above 10 is commonly considered the threshold for a strong instrument.\n")
+cat("\\end{flushleft}\n")
+cat("\\end{table}\n")
+```
+
+\newpage
+
+## Appendix Table 4 - Differences between reported German COVID-19 mortality statistics and actual statistics
+```{r , echo=FALSE, message=FALSE, warning=FALSE, results='asis'}
+library(dplyr)
+library(knitr)
+df <- read_dta("../2input_data/Updated_data_cleaned.dta")
+df_summary <- df %>%
+  summarise(
+    Mean = c(mean(weekly_deaths_a, na.rm = TRUE), mean(weekly_death_RKI, na.rm = TRUE)),
+    Median = c(median(weekly_deaths_a, na.rm = TRUE), median(weekly_death_RKI, na.rm = TRUE)),
+    Max = c(max(weekly_deaths_a, na.rm = TRUE), max(weekly_death_RKI, na.rm = TRUE)),
+    Min = c(min(weekly_deaths_a, na.rm = TRUE), min(weekly_death_RKI, na.rm = TRUE))
+  ) %>%
+  mutate(Source = c("Reported COVID data", "Actual COVID data")) %>%
+  select(Source, Mean, Median, Max, Min)
+
+# Display the summary table
+kable(df_summary, caption = "Summary Statistics: Reported vs Actual Weekly COVID Deaths", digits = 1)
+```
